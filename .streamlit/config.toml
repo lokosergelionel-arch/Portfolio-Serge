@@ -18,10 +18,18 @@ textColor="#1E1E1E"
 font="sans serif"
 
 [client]
-# Masque la barre d'outils en haut (boutons de déploiement, menu)
-toolbarMode="minimal"
-# Empêche l'affichage du menu hamburger et des options de partage
+# Désactive la barre d'outils, le menu et les notifications de déploiement
+toolbarMode="hidden"
 showErrorDetails=false
+showSidebarNavigation=false
+
+[browser]
+gatherUsageStats=false
+
+[ui]
+# Supprime la barre supérieure de décoration (ligne de couleur en haut)
+hideTopBar=true
+hideSidebarNav=true
 
 [browser]
 # Supprime le logo Streamlit dans l'onglet du navigateur
