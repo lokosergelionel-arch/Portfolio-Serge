@@ -85,10 +85,13 @@ header, footer, #MainMenu, .stDeployButton, [data-testid="stHeader"], [data-test
 """, unsafe_allow_html=True)
 
 # 3. CONNEXION OPENAI
-try:
-    api_key = st.secrets["OPENAI_API_KEY"]
-except:
-    st.error("Clé API manquante dans les secrets (OPENAI_API_KEY).")
+import os
+
+# On cherche la clé soit dans Streamlit (local/cloud), soit dans Render (os.environ)
+api_key = st.secrets.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+
+if not api_key:
+    st.error("Clé API manquante (OPENAI_API_KEY).")
     st.stop()
 
 client = OpenAI(api_key=api_key)
