@@ -87,11 +87,18 @@ header, footer, #MainMenu, .stDeployButton, [data-testid="stHeader"], [data-test
 # 3. CONNEXION OPENAI
 import os
 
-# On cherche la clé soit dans Streamlit (local/cloud), soit dans Render (os.environ)
-api_key = st.secrets.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+# On essaie d'abord la méthode standard des serveurs (Render)
+api_key = os.environ.get("OPENAI_API_KEY")
+
+# Si on ne trouve rien (ex: sur Streamlit Cloud), on cherche dans les secrets Streamlit
+if not api_key:
+    try:
+        api_key = st.secrets["OPENAI_API_KEY"]
+    except:
+        api_key = None
 
 if not api_key:
-    st.error("Clé API manquante (OPENAI_API_KEY).")
+    st.error("Oups ! La clé API est introuvable. Vérifiez vos variables d'environnement.")
     st.stop()
 
 client = OpenAI(api_key=api_key)
