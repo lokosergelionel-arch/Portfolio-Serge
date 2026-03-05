@@ -18,8 +18,10 @@ textColor="#1E1E1E"
 font="sans serif"
 
 [client]
-# Masque la barre d'outils en haut (boutons de déploiement, menu)
-toolbarMode="minimal"
+# Masque TOTALEMENT le logo, le menu hamburger et le bouton Deploy
+# On remplace "minimal" par "hidden" pour une suppression complète
+toolbarMode="hidden"
+
 # Empêche l'affichage du menu hamburger et des options de partage
 showErrorDetails=false
 
