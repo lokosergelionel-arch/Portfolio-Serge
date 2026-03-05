@@ -10,31 +10,20 @@ st.set_page_config(
 )
 
 # 2. CSS ULTRA-AGRESSIF (Supprime le rouge, les logos et force le design Image 3)
+# AJOUT : Sélecteurs spécifiques pour le déploiement Cloud (data-testid)
 st.markdown("""
     <style>
-/* --- AJOUT POUR FAIRE PARTIR LE LOGO --- */
-/* Cible absolument tous les éléments de l'interface Streamlit qui affichent des logos ou des menus */
-[data-testid="stHeader"], 
-[data-testid="stToolbar"], 
-[data-testid="stDecoration"],
-[data-testid="stStatusWidget"],
-#MainMenu, 
-header, 
-footer, 
-.stAppHeader,
-.st-emotion-cache-18ni7ap, 
-.st-emotion-cache-zq5wmm,
-.st-emotion-cache-h5rgaw {
-    visibility: hidden !important;
-    display: none !important;
-    height: 0 !important;
-}
-/* --------------------------------------- */
-
 /* Force le mode clair et neutralise les thèmes automatiques du Cloud */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main {
     background-color: white !important;
     color: #1E1E1E !important;
+}
+
+/* MASQUAGE TOTAL DES LOGOS ET MENUS (BLINDAGE DÉPLOIEMENT) */
+/* Cache le header, le menu hamburger, le bouton 'Deploy' et le footer 'Made with Streamlit' */
+header, footer, #MainMenu, .stDeployButton, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] {
+    visibility: hidden !important;
+    display: none !important;
 }
 
 /* Design du Cadre Header (Réplique Image 3) */
@@ -61,11 +50,13 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main 
 }
 
 /* SUPPRESSION DU CONTOUR ROUGE SUR LA ZONE DE SAISIE */
+/* On cible l'élément parent et l'état focus pour écraser le rouge par le bleu marine */
 [data-testid="stChatInput"] {
     border: 1px solid #0E2A47 !important;
     border-radius: 10px !important;
 }
 
+/* Supprime la bordure rouge spécifique de l'input Streamlit au focus */
 [data-testid="stChatInput"] textarea {
     border: none !important;
     box-shadow: none !important;
@@ -81,9 +72,14 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main 
     fill: #0E2A47 !important;
 }
 
-/* Fix couleur texte messages */
+/* Fix couleur texte messages pour éviter le blanc sur blanc en cas de Dark Mode forcé */
 [data-testid="stChatMessage"] p {
     color: #1E1E1E !important;
+}
+
+/* Supprime la barre de couleur en haut de page */
+[data-testid="stDecoration"] {
+    display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -192,10 +188,12 @@ for msg in st.session_state.messages:
 
 # 8. ZONE DE SAISIE ET GÉNÉRATION
 if prompt := st.chat_input("Tapez vos questions..."):
+    # Affichage utilisateur
     with st.chat_message("user", avatar="👤"):
         st.write(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
+    # Génération assistant
     with st.chat_message("assistant", avatar="💼"):
         with st.spinner(""):
             try:
