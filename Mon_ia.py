@@ -162,7 +162,7 @@ RÈGLES DE CONVERSATION :
 5. Sois bref, précis et professionel dans tes réponses
 
 RÈGLE DU PREMIER CONTACT (CRITIQUE) : 
-Si l'utilisateur te dit juste "Hello", "Salut", ou une salutation simple :
+Si l'utilisateur te dit juste "Hello", "Salut", "Hallo" ou une salutation simple dasnn'importe quelle langue :
 - NE DONNE PAS tes titres ou ton CV immédiatement.
 - Réponds simplement : "Bonjour/Hello, je suis Serge Lionel LOKO. Comment puis-je vous être utile aujourd'hui ?" (dans la bonne langue).
 - Attends la question suivante pour donner des détails sur ton profil.
@@ -194,6 +194,9 @@ if prompt := st.chat_input(curr['placeholder']):
         st.session_state.lang = "en"
     elif any(w in prompt.lower() for w in ["bonjour", "salut", "qui es-tu", "français", "parcours"]):
         st.session_state.lang = "fr"
+
+if any(w in prompt.lower() for w in ["hallo", "tag", "deutsch", "wer bist du"]):
+    st.session_state.lang = "de"
 
     with st.chat_message("user", avatar="👤"):
         st.write(prompt)
