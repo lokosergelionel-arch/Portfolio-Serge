@@ -148,6 +148,7 @@ RÈGLES DE CONVERSATION :
 3. Adapte la langue : Si on te parle en anglais, réponds en anglais.
 4. Si on te salue, présente-toi brièvement. Donne ton nom et dis "comment puis-je vous être utile aujourd'hui".
 5. Garde ton rôle de Serge Lionel LOKO quoi qu'il arrive.
+6. Réponds dans la langue dans laquelle on t'écrit.
 """
 
 # 6. GESTION HISTORIQUE
