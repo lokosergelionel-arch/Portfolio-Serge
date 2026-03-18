@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. CSS ULTRA-AGRESSIF (Design Image 3 conservé)
+# 2. CSS ULTRA-AGRESSIF (Design Image 3)
 st.markdown("""
     <style>
 html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main {
@@ -64,130 +64,102 @@ header, footer, #MainMenu, .stDeployButton, [data-testid="stHeader"], [data-test
 """, unsafe_allow_html=True)
 
 # 3. CONNEXION OPENAI
-api_key = os.environ.get("OPENAI_API_KEY")
+api_key = os.environ.get("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 if not api_key:
-    try:
-        api_key = st.secrets["OPENAI_API_KEY"]
-    except:
-        api_key = None
-
-if not api_key:
-    st.error("Oups ! La clé API est introuvable. Vérifiez vos variables d'environnement.")
+    st.error("Clé API introuvable.")
     st.stop()
-
 client = OpenAI(api_key=api_key)
 
-# 4. TEXTES COMPLETS (PROFIL ET PARCOURS)
+# 4. TEXTES DE L'INTERFACE (MULTILINGUE)
+if "lang" not in st.session_state:
+    st.session_state.lang = "fr"
+
+texts = {
+    "fr": {
+        "title": "Bonjour, je suis Serge Lionel LOKO",
+        "subtitle": "N'hésitez pas à me poser des questions sur mon parcours et mes compétences.",
+        "placeholder": "Tapez votre question..."
+    },
+    "en": {
+        "title": "Hello, I am Serge Lionel LOKO",
+        "subtitle": "Feel free to ask me anything about my career and skills.",
+        "placeholder": "Type your question..."
+    }
+}
+
+# 5. TON PROFIL COMPLET (RÉINTÉGRÉ)
 profil_de_serge = """
 IDENTITÉ :
 - Nom : Serge Lionel LOKO
 PROFIL : Service Desk Analyst| User Support Analyst | Chef de Projet | Développeur Junior | Data Analyst Junior
 
 RÉSUMÉ :
-Je possède un parcours atypique et complémentaire, alliant compétences humaines et techniques. Issu d’une formation initiale en germanistique, j’ai développé de solides capacités de communication, d’analyse et une forte sensibilité interculturelle.
-
-En parallèle, j’ai acquis plus de quatre années d’expérience au sein de l’une des plus grandes organisations de jeunesse au monde AIESEC, où j’ai évolué sur des missions de gestion de projets, de coordination d’équipes et de people management, avec une approche proche des enjeux RH.
-
-Ces expériences m’ont permis de renforcer des qualités telles que l’écoute active, l’organisation, la prise de décision, le leadership et le sens des responsabilités.
-
-Guidé par une passion profonde pour la technologie et la résolution de problèmes, je me suis naturellement orienté vers l’informatique. Aujourd’hui, je développe des compétences concrètes en support IT, systèmes et programmation à travers mes projets et expériences pratiques.
-
-Rigoureux, organisé et orienté solutions, j’apprends rapidement et m’adapte facilement à de nouveaux environnements. J’apprécie le travail en équipe et je communique efficacement avec des profils techniques comme non techniques.
-
-Mon objectif est d’évoluer au sein d’une entreprise où je peux apporter une réelle valeur, continuer à monter en compétences et m’inscrire sur le long terme.
+Je possède un parcours atypique et complémentaire, alliant compétences humaines et techniques. Issu d’une formation initiale en germanistique, j’ai développé de solides capacités de communication, d’analyse et une forte sensibilité interculturelle. Plus de 4 ans d'expérience chez AIESEC en gestion de projet et management.
 
 COMPÉTENCES CLÉS :
-- Gestion de projet 
-- Python (Niveau débutant mais passionné)
-- Négociation commerciale
-- Service Desk Support (L1 with L2 Exposure)
-- Incident & Request Management (ITIL-oriented)
-- Ticketing Systems (ServiceNow – SNOW)
-- Hardware & Software Troubleshooting
-- User Access & System Support
-- IT Documentation & Knowledge Base
-- Anglais (Avancé), Allemand (intermédiaire B1), Français (Langue maternelle)
+- Python, Gestion de projet, Négociation commerciale.
+- Support IT (L1/L2), ServiceNow (SNOW), Troubleshooting Hardware/Software.
+- Anglais (Avancé), Allemand (B1), Français (Maternel).
 
 EXPÉRIENCES :
-1. Service Desk Analyst – L1 (with L2 Exposure) | Tata Consultancy Services (TCS) | Budapest (Since 2023)
-- Support L1 & L2 troubleshooting for French-speaking users.
-- Resolution of incidents (software, hardware, system access).
-- Management using ServiceNow (SLA compliance).
+1. Service Desk Analyst L1/L2 | TCS Budapest (Depuis 2023)
+2. Customer Support Associate | Amazon/Majorel Togo (2020)
+3. German Customer Support L3 | TCS Hyderabad (2018–2019)
 
-2. Customer Support Associate – Amazon | Majorel, Togo (2020)
-- Support via phone/email, conflict management.
-
-3. German Customer Support – Level 3 | TCS | Hyderabad, India (2018–2019)
-- Level 3 support tickets, SAP usage, critical tickets management.
-
-EDUCATION:
-- Autodidacte en Intelligence Artificielle (2025)
-- BSc in Data Science and Analytics | JAIN University, India (2024)
+ÉDUCATION :
+- BSc in Data Science and Analytics | JAIN University (2024)
 - Bachelor’s Degree – German Studies | University of Lomé (2018)
-
-TOOLS : ServiceNow (SNOW), SAP, Office 365, Teams, Jira.
-
-SOFT SKILLS : Curieux, résilient, très bon relationnel, rigoureux, organisé, esprit d’équipe.
-
-CONTACT :
-- Email : loko.sergelionel@gmail.com
-- LinkedIn : https://www.linkedin.com/in/koffi-mawugnon-serge-lionel-loko
 """
 
-# 5. INSTRUCTIONS SYSTÈME (LE CERVEAU)
 instruction_systeme = f"""
-Tu n'es pas une IA générique. TU ES SERGE LIONEL LOKO.
-Tu parles toujours à la première personne du singulier ("Je", "Mon", "Mes").
-Réponds de manière concise, professionnelle et directe.
-Voici ton parcours et tes compétences :
-{profil_de_serge}
-
-RÈGLES DE CONVERSATION :
-1. Si un recruteur te demande "Qui êtes-vous ?", présente-toi brièvement.
-2. Ne t'invente pas de vie. Si une compétence n'est pas dans la liste, dis honnêtement que tu apprends vite.
-3. Adapte la langue : Si on te parle en anglais, réponds en anglais.
-4. Si on te salue, présente-toi brièvement. Donne ton nom et dis "comment puis-je vous être utile aujourd'hui".
-5. Garde ton rôle de Serge Lionel LOKO quoi qu'il arrive.
-6. Réponds dans la langue dans laquelle on t'écrit.
+Tu ES SERGE LIONEL LOKO. Réponds toujours à la première personne ("Je").
+RÈGLES CRITIQUES :
+1. LANGUE : Réponds SYSTÉMATIQUEMENT dans la langue de l'utilisateur. S'il dit "Hello", réponds en Anglais. S'il dit "Salut", réponds en Français.
+2. PREMIER MESSAGE : Présente-toi brièvement et demande comment tu peux aider, dans la langue détectée.
+3. INFOS : Utilise exclusivement ce profil : {profil_de_serge}
 """
 
-# 6. GESTION HISTORIQUE
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": instruction_systeme}]
 
-# 7. HEADER
-st.markdown("""
+# 6. HEADER DYNAMIQUE
+curr = texts[st.session_state.lang]
+st.markdown(f"""
     <div class="header-box">
-        <h1>Bonjour, je suis Serge Lionel LOKO</h1>
-        <h3>N'hésitez pas à me poser des questions sur mon parcours et mes compétences.</h3>
+        <h1>{curr['title']}</h1>
+        <h3>{curr['subtitle']}</h3>
     </div>
     """, unsafe_allow_html=True)
 
+# Affichage des messages
 for msg in st.session_state.messages:
     if msg["role"] != "system":
         avatar = "👤" if msg["role"] == "user" else "💼"
         with st.chat_message(msg["role"], avatar=avatar):
             st.write(msg["content"])
 
-# 8. GÉNÉRATION AVEC STREAMING ET SPINNER SANS TEXTE
-if prompt := st.chat_input("Tapez vos questions..."):
+# 7. LOGIQUE DE CHAT ET DÉTECTION DE LANGUE
+if prompt := st.chat_input(curr['placeholder']):
+    # Détection simplifiée pour basculer l'interface
+    if any(w in prompt.lower() for w in ["hello", "hi", "who are you", "english", "career"]):
+        st.session_state.lang = "en"
+    elif any(w in prompt.lower() for w in ["bonjour", "salut", "qui es-tu", "français", "parcours"]):
+        st.session_state.lang = "fr"
+
     with st.chat_message("user", avatar="👤"):
         st.write(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Contexte limité pour performance
-    contexte_optimise = [st.session_state.messages[0]] + st.session_state.messages[-6:]
+    contexte = [st.session_state.messages[0]] + st.session_state.messages[-6:]
 
     with st.chat_message("assistant", avatar="💼"):
-        # Spinner sans texte (juste l'animation)
         with st.spinner(""):
             placeholder = st.empty()
             full_response = ""
-            
             try:
                 stream = client.chat.completions.create(
                     model="gpt-4o-mini",
-                    messages=contexte_optimise,
+                    messages=contexte,
                     stream=True,
                 )
                 for response in stream:
@@ -198,5 +170,6 @@ if prompt := st.chat_input("Tapez vos questions..."):
                 
                 placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
+                st.rerun() # Pour actualiser le Header si la langue a changé
             except Exception as e:
                 st.error(f"Erreur : {e}")
