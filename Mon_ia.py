@@ -189,17 +189,25 @@ for msg in st.session_state.messages:
 
 # 7. LOGIQUE DE CHAT ET DÉTECTION
 if prompt := st.chat_input(curr['placeholder']):
-    # DÉTECTION DES MOTS CLÉS
-    if any(w in prompt.lower() for w in ["hello", "hi", "who are you"]):
-        st.session_state.lang = "en"
-    elif any(w in prompt.lower() for w in ["hallo", "tag", "wie geht", "wer bist"]):
+    
+    # Nettoyage et détection de la langue pour l'interface
+    user_input = prompt.lower()
+    
+    if any(w in user_input for w in ["hallo", "tag", "deutsch", "wer bist"]):
         st.session_state.lang = "de"
-    elif any(w in prompt.lower() for w in ["bonjour", "salut", "qui es-tu"]):
+    elif any(w in user_input for w in ["hello", "hi", "who are you", "english"]):
+        st.session_state.lang = "en"
+    elif any(w in user_input for w in ["bonjour", "salut", "qui es-tu", "français"]):
         st.session_state.lang = "fr"
 
+    # Affichage du message utilisateur
     with st.chat_message("user", avatar="👤"):
         st.write(prompt)
+    
+    # Ajout à l'historique
     st.session_state.messages.append({"role": "user", "content": prompt})
+
+    # ... la suite du code (contexte, stream, rerun) reste la même
 
     contexte = [st.session_state.messages[0]] + st.session_state.messages[-6:]
 
