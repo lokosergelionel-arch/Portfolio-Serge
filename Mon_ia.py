@@ -189,14 +189,13 @@ for msg in st.session_state.messages:
 
 # 7. LOGIQUE DE CHAT ET DÉTECTION
 if prompt := st.chat_input(curr['placeholder']):
-    # Détection pour changer le Header (UI)
-    if any(w in prompt.lower() for w in ["hello", "hi", "hey", "who are you", "english", "career"]):
+    # DÉTECTION DES MOTS CLÉS
+    if any(w in prompt.lower() for w in ["hello", "hi", "who are you"]):
         st.session_state.lang = "en"
-    elif any(w in prompt.lower() for w in ["bonjour", "salut", "qui es-tu", "français", "parcours"]):
+    elif any(w in prompt.lower() for w in ["hallo", "tag", "wie geht", "wer bist"]):
+        st.session_state.lang = "de"
+    elif any(w in prompt.lower() for w in ["bonjour", "salut", "qui es-tu"]):
         st.session_state.lang = "fr"
-
-if any(w in prompt.lower() for w in ["hallo", "tag", "deutsch", "wer bist du"]):
-    st.session_state.lang = "de"
 
     with st.chat_message("user", avatar="👤"):
         st.write(prompt)
