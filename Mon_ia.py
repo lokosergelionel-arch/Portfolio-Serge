@@ -1,5 +1,6 @@
 import streamlit as st
 from openai import OpenAI
+import os
 
 # 1. CONFIGURATION DE LA PAGE
 st.set_page_config(
@@ -9,24 +10,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. CSS ULTRA-AGRESSIF (Supprime le rouge, les logos et force le design Image 3)
-# AJOUT : Sélecteurs spécifiques pour le déploiement Cloud (data-testid)
+# 2. CSS ULTRA-AGRESSIF (Design Image 3 conservé)
 st.markdown("""
     <style>
-/* Force le mode clair et neutralise les thèmes automatiques du Cloud */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main {
     background-color: white !important;
     color: #1E1E1E !important;
 }
-
-/* MASQUAGE TOTAL DES LOGOS ET MENUS (BLINDAGE DÉPLOIEMENT) */
-/* Cache le header, le menu hamburger, le bouton 'Deploy' et le footer 'Made with Streamlit' */
 header, footer, #MainMenu, .stDeployButton, [data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stDecoration"] {
     visibility: hidden !important;
     display: none !important;
 }
-
-/* Design du Cadre Header (Réplique Image 3) */
 .header-box {
     border: 2px solid #0E2A47 !important;
     padding: 40px 30px !important;
@@ -48,49 +42,29 @@ header, footer, #MainMenu, .stDeployButton, [data-testid="stHeader"], [data-test
     font-size: 16px !important;
     font-weight: 400 !important;
 }
-
-/* SUPPRESSION DU CONTOUR ROUGE SUR LA ZONE DE SAISIE */
-/* On cible l'élément parent et l'état focus pour écraser le rouge par le bleu marine */
 [data-testid="stChatInput"] {
     border: 1px solid #0E2A47 !important;
     border-radius: 10px !important;
 }
-
-/* Supprime la bordure rouge spécifique de l'input Streamlit au focus */
 [data-testid="stChatInput"] textarea {
     border: none !important;
     box-shadow: none !important;
 }
-
 [data-testid="stChatInput"]:focus-within {
     border-color: #0E2A47 !important;
     box-shadow: 0 0 0 1px #0E2A47 !important;
 }
-
-/* Bouton d'envoi en Bleu Marine (SVG) */
 [data-testid="stChatInputSubmitButton"] svg {
     fill: #0E2A47 !important;
 }
-
-/* Fix couleur texte messages pour éviter le blanc sur blanc en cas de Dark Mode forcé */
 [data-testid="stChatMessage"] p {
     color: #1E1E1E !important;
-}
-
-/* Supprime la barre de couleur en haut de page */
-[data-testid="stDecoration"] {
-    display: none !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # 3. CONNEXION OPENAI
-import os
-
-# On essaie d'abord la méthode standard des serveurs (Render)
 api_key = os.environ.get("OPENAI_API_KEY")
-
-# Si on ne trouve rien (ex: sur Streamlit Cloud), on cherche dans les secrets Streamlit
 if not api_key:
     try:
         api_key = st.secrets["OPENAI_API_KEY"]
@@ -172,14 +146,15 @@ RÈGLES DE CONVERSATION :
 1. Si un recruteur te demande "Qui êtes-vous ?", présente-toi brièvement.
 2. Ne t'invente pas de vie. Si une compétence n'est pas dans la liste, dis honnêtement que tu apprends vite.
 3. Adapte la langue : Si on te parle en anglais, réponds en anglais.
-4. Si on te salue, présente-toi brièvement. Donne ton nom et dis "comment puis-je vous êtes utiles aujourd'hui"
+4. Si on te salue, présente-toi brièvement. Donne ton nom et dis "comment puis-je vous être utile aujourd'hui".
+5. Garde ton rôle de Serge Lionel LOKO quoi qu'il arrive.
 """
 
 # 6. GESTION DE L'HISTORIQUE
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": instruction_systeme}]
 
-# 7. AFFICHAGE DU HEADER (IMAGE 3)
+# 7. AFFICHAGE DU HEADER
 st.markdown("""
     <div class="header-box">
         <h1>Bonjour, je suis Serge Lionel LOKO</h1>
@@ -187,29 +162,28 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# Affichage des messages
+# Affichage des messages (on ignore le message système pour l'UI)
 for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        with st.chat_message("user", avatar="👤"):
-            st.write(msg["content"])
-    elif msg["role"] == "assistant":
-        with st.chat_message("assistant", avatar="💼"):
+    if msg["role"] != "system":
+        avatar = "👤" if msg["role"] == "user" else "💼"
+        with st.chat_message(msg["role"], avatar=avatar):
             st.write(msg["content"])
 
 # 8. ZONE DE SAISIE ET GÉNÉRATION
 if prompt := st.chat_input("Tapez vos questions..."):
-    # Affichage utilisateur
     with st.chat_message("user", avatar="👤"):
         st.write(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Génération assistant
+    # On prépare un contexte limité pour optimiser les performances
+    contexte_optimise = [st.session_state.messages[0]] + st.session_state.messages[-6:]
+
     with st.chat_message("assistant", avatar="💼"):
         with st.spinner(""):
             try:
                 reponse = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=st.session_state.messages
+                    model="gpt-4o-mini", # Optimisation coût/vitesse
+                    messages=contexte_optimise
                 )
                 msg_ia = reponse.choices[0].message.content
                 st.write(msg_ia)
