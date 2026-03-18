@@ -150,11 +150,11 @@ RÈGLES DE CONVERSATION :
 5. Garde ton rôle de Serge Lionel LOKO quoi qu'il arrive.
 """
 
-# 6. GESTION DE L'HISTORIQUE
+# 6. GESTION HISTORIQUE
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "system", "content": instruction_systeme}]
 
-# 7. AFFICHAGE DU HEADER
+# 7. HEADER
 st.markdown("""
     <div class="header-box">
         <h1>Bonjour, je suis Serge Lionel LOKO</h1>
@@ -162,31 +162,40 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# Affichage des messages (on ignore le message système pour l'UI)
 for msg in st.session_state.messages:
     if msg["role"] != "system":
         avatar = "👤" if msg["role"] == "user" else "💼"
         with st.chat_message(msg["role"], avatar=avatar):
             st.write(msg["content"])
 
-# 8. ZONE DE SAISIE ET GÉNÉRATION
+# 8. GÉNÉRATION AVEC STREAMING ET SPINNER SANS TEXTE
 if prompt := st.chat_input("Tapez vos questions..."):
     with st.chat_message("user", avatar="👤"):
         st.write(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # On prépare un contexte limité pour optimiser les performances
+    # Contexte limité pour performance
     contexte_optimise = [st.session_state.messages[0]] + st.session_state.messages[-6:]
 
     with st.chat_message("assistant", avatar="💼"):
+        # Spinner sans texte (juste l'animation)
         with st.spinner(""):
+            placeholder = st.empty()
+            full_response = ""
+            
             try:
-                reponse = client.chat.completions.create(
-                    model="gpt-4o-mini", # Optimisation coût/vitesse
-                    messages=contexte_optimise
+                stream = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=contexte_optimise,
+                    stream=True,
                 )
-                msg_ia = reponse.choices[0].message.content
-                st.write(msg_ia)
-                st.session_state.messages.append({"role": "assistant", "content": msg_ia})
+                for response in stream:
+                    content = response.choices[0].delta.content
+                    if content:
+                        full_response += content
+                        placeholder.markdown(full_response + "▌")
+                
+                placeholder.markdown(full_response)
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
             except Exception as e:
                 st.error(f"Erreur : {e}")
