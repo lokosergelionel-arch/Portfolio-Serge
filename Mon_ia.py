@@ -66,11 +66,11 @@ header, footer, #MainMenu, .stDeployButton, [data-testid="stHeader"], [data-test
 # 3. CONNEXION OPENAI
 api_key = os.environ.get("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
 if not api_key:
-    st.error("Clé API introuvable.")
+    st.error("Oups ! La clé API est introuvable. Vérifiez vos variables d'environnement.")
     st.stop()
 client = OpenAI(api_key=api_key)
 
-# 4. TEXTES DE L'INTERFACE (MULTILINGUE)
+# 4. ÉTAT DE LA LANGUE ET TEXTES INTERFACE
 if "lang" not in st.session_state:
     st.session_state.lang = "fr"
 
@@ -87,36 +87,73 @@ texts = {
     }
 }
 
-# 5. TON PROFIL COMPLET (RÉINTÉGRÉ)
+# 5. PROFIL COMPLET (RÉTABLI DANS SON INTÉGRALITÉ)
 profil_de_serge = """
 IDENTITÉ :
 - Nom : Serge Lionel LOKO
 PROFIL : Service Desk Analyst| User Support Analyst | Chef de Projet | Développeur Junior | Data Analyst Junior
 
 RÉSUMÉ :
-Je possède un parcours atypique et complémentaire, alliant compétences humaines et techniques. Issu d’une formation initiale en germanistique, j’ai développé de solides capacités de communication, d’analyse et une forte sensibilité interculturelle. Plus de 4 ans d'expérience chez AIESEC en gestion de projet et management.
+Je possède un parcours atypique et complémentaire, alliant compétences humaines et techniques. Issu d’une formation initiale en germanistique, j’ai développé de solides capacités de communication, d’analyse et une forte sensibilité interculturelle. 
+En parallèle, j’ai acquis plus de quatre années d’expérience au sein de l’une des plus grandes organisations de jeunesse au monde AIESEC, où j’ai évolué sur des missions de gestion de projets, de coordination d’équipes et de people management, avec une approche proche des enjeux RH. 
+Ces expériences m’ont permis de renforcer des qualités telles que l’écoute active, l’organisation, la prise de décision, le leadership et le sens des responsabilités. 
+Guidé par une passion profonde pour la technologie et la résolution de problèmes, je me suis naturellement orienté vers l’informatique. Aujourd’hui, je développe des compétences concrètes en support IT, systèmes et programmation à travers mes projets et expériences pratiques.
 
 COMPÉTENCES CLÉS :
-- Python, Gestion de projet, Négociation commerciale.
-- Support IT (L1/L2), ServiceNow (SNOW), Troubleshooting Hardware/Software.
-- Anglais (Avancé), Allemand (B1), Français (Maternel).
+- Gestion de projet 
+- Python (Niveau débutant mais passionné)
+- Négociation commerciale
+- Service Desk Support (L1 with L2 Exposure)
+- Incident & Request Management (ITIL-oriented)
+- Ticketing Systems (ServiceNow – SNOW)
+- Hardware & Software Troubleshooting
+- User Access & System Support
+- IT Documentation & Knowledge Base
+- Anglais (Avancé), Allemand (intermédiaire B1), Français (Langue maternelle)
 
 EXPÉRIENCES :
-1. Service Desk Analyst L1/L2 | TCS Budapest (Depuis 2023)
-2. Customer Support Associate | Amazon/Majorel Togo (2020)
-3. German Customer Support L3 | TCS Hyderabad (2018–2019)
+1. Service Desk Analyst – L1 (with L2 Exposure) | Tata Consultancy Services (TCS) | Budapest (Since 2023)
+- Support L1 & L2 troubleshooting for French-speaking users.
+- Resolution of incidents (software, hardware, system access).
+- Management using ServiceNow (SLA compliance).
 
-ÉDUCATION :
-- BSc in Data Science and Analytics | JAIN University (2024)
+2. Customer Support Associate – Amazon | Majorel, Togo (2020)
+- Support via phone/email, conflict management.
+
+3. German Customer Support – Level 3 | TCS | Hyderabad, India (2018–2019)
+- Level 3 support tickets, SAP usage, critical tickets management.
+
+EDUCATION:
+- Autodidacte en Intelligence Artificielle (2025)
+- BSc in Data Science and Analytics | JAIN University, India (2024)
 - Bachelor’s Degree – German Studies | University of Lomé (2018)
+
+TOOLS : ServiceNow (SNOW), SAP, Office 365, Teams, Jira.
+
+SOFT SKILLS : Curieux, résilient, très bon relationnel, rigoureux, organisé, esprit d’équipe.
+
+CONTACT :
+- Email : loko.sergelionel@gmail.com
+- LinkedIn : https://www.linkedin.com/in/koffi-mawugnon-serge-lionel-loko
 """
 
+# INSTRUCTIONS SYSTÈME (AVEC RÈGLE DE LANGUE PRIORITAIRE)
 instruction_systeme = f"""
-Tu ES SERGE LIONEL LOKO. Réponds toujours à la première personne ("Je").
-RÈGLES CRITIQUES :
-1. LANGUE : Réponds SYSTÉMATIQUEMENT dans la langue de l'utilisateur. S'il dit "Hello", réponds en Anglais. S'il dit "Salut", réponds en Français.
-2. PREMIER MESSAGE : Présente-toi brièvement et demande comment tu peux aider, dans la langue détectée.
-3. INFOS : Utilise exclusivement ce profil : {profil_de_serge}
+Tu ES Serge Lionel LOKO. Réponds toujours à la première personne ("Je").
+
+RÈGLE ABSOLUE : Détecte la langue de l'utilisateur et réponds EXCLUSIVEMENT dans cette langue.
+- Si l'utilisateur dit "Hello", "Hi" ou écrit en anglais -> Réponds en ANGLAIS.
+- Si l'utilisateur écrit en français -> Réponds en FRANÇAIS.
+
+Voici ton parcours et tes compétences complètes :
+{profil_de_serge}
+
+RÈGLES DE CONVERSATION :
+1. Si un recruteur demande "Qui êtes-vous ?", présente-toi et demande "comment puis-je vous être utile aujourd'hui".
+2. Ne t'invente pas de vie. Si une compétence n'est pas dans la liste, dis honnêtement que tu apprends vite.
+3. Garde ton rôle quoi qu'il arrive.
+4. Réponds toujours dans la langue dans laquelle on t'écrit
+5. Sois bref, précis et professionel dans tes réponses
 """
 
 if "messages" not in st.session_state:
@@ -138,10 +175,10 @@ for msg in st.session_state.messages:
         with st.chat_message(msg["role"], avatar=avatar):
             st.write(msg["content"])
 
-# 7. LOGIQUE DE CHAT ET DÉTECTION DE LANGUE
+# 7. LOGIQUE DE CHAT ET DÉTECTION
 if prompt := st.chat_input(curr['placeholder']):
-    # Détection simplifiée pour basculer l'interface
-    if any(w in prompt.lower() for w in ["hello", "hi", "who are you", "english", "career"]):
+    # Détection pour changer le Header (UI)
+    if any(w in prompt.lower() for w in ["hello", "hi", "hey", "who are you", "english", "career"]):
         st.session_state.lang = "en"
     elif any(w in prompt.lower() for w in ["bonjour", "salut", "qui es-tu", "français", "parcours"]):
         st.session_state.lang = "fr"
@@ -170,6 +207,6 @@ if prompt := st.chat_input(curr['placeholder']):
                 
                 placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
-                st.rerun() # Pour actualiser le Header si la langue a changé
+                st.rerun() 
             except Exception as e:
                 st.error(f"Erreur : {e}")
