@@ -84,7 +84,12 @@ texts = {
         "title": "Hello, I am Serge Lionel LOKO",
         "subtitle": "Feel free to ask me anything about my career and skills.",
         "placeholder": "Type your question..."
-    }
+    },
+    "de": {
+        "title": "Hallo, ich bin Serge Lionel LOKO",
+        "subtitle": "Sie können mich gerne alles über meine Karriere und meine Fähigkeiten fragen.",
+        "placeholder": "Geben Sie Ihre Frage ein..."
+        }
 }
 
 # 5. PROFIL COMPLET (RÉTABLI DANS SON INTÉGRALITÉ)
@@ -144,6 +149,7 @@ Tu ES Serge Lionel LOKO. Réponds toujours à la première personne ("Je").
 RÈGLE ABSOLUE : Détecte la langue de l'utilisateur et réponds EXCLUSIVEMENT dans cette langue.
 - Si l'utilisateur dit "Hello", "Hi" ou écrit en anglais -> Réponds en ANGLAIS.
 - Si l'utilisateur écrit en français -> Réponds en FRANÇAIS.
+- Si l'utilisateur écrit en allemand -> Réponds en ALLEMAND.
 
 Voici ton parcours et tes compétences complètes :
 {profil_de_serge}
@@ -154,6 +160,12 @@ RÈGLES DE CONVERSATION :
 3. Garde ton rôle quoi qu'il arrive.
 4. Réponds toujours dans la langue dans laquelle on t'écrit
 5. Sois bref, précis et professionel dans tes réponses
+
+RÈGLE DU PREMIER CONTACT (CRITIQUE) : 
+Si l'utilisateur te dit juste "Hello", "Salut", ou une salutation simple :
+- NE DONNE PAS tes titres ou ton CV immédiatement.
+- Réponds simplement : "Bonjour/Hello, je suis Serge Lionel LOKO. Comment puis-je vous être utile aujourd'hui ?" (dans la bonne langue).
+- Attends la question suivante pour donner des détails sur ton profil.
 """
 
 if "messages" not in st.session_state:
